@@ -1,0 +1,1 @@
+﻿package  {		import flash.display.MovieClip;	import com.oggi.GlobalProxy;	import com.oggi.Player.ListenerContext; ListenerContext;		public class TestLoader extends MovieClip {						public function TestLoader() {			var proxy:GlobalProxy = new GlobalProxy();			proxy.initProxy("http://localhost/gmap/Test.swf");		}			}	}
