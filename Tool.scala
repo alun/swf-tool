@@ -10,10 +10,10 @@ import apparat.abc.analysis._
 object Tool {
 
   import apparat.abc.AbcNamespaceKind._
-  val proxyPackage = AbcNamespace(Package,Symbol("com.oggi.Player"))
-  val proxyClass = AbcQName('ListenerContext, proxyPackage)
+  val proxyPackage = AbcNamespace(Package,Symbol("com.oggi"))
+  val proxyClass = AbcQName('GoogleMapsHook, proxyPackage)
   val rootPackage = AbcNamespace(Package,Symbol(""))
-  val proxyMethod = AbcQName('bind, rootPackage)
+  val proxyMethod = AbcQName('setupEventListener, rootPackage)
 
   def main(args: Array[String]) {
     for {
