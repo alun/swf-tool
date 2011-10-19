@@ -15,7 +15,7 @@ object Tool {
   val rootPackage = AbcNamespace(Package,Symbol(""))
   val proxyMethod = AbcQName('bind, rootPackage)
 
-	def main(args: Array[String]) {
+  def main(args: Array[String]) {
     for {
       file <- args.headOption
     } {
@@ -27,7 +27,7 @@ object Tool {
           dump(file)
       }
     }
-	}
+  }
 
   def dump(file: String) {
     val swf = Swf fromFile file
