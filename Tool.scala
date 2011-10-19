@@ -7,7 +7,7 @@ import BytecodeChains._
 import operations._
 import apparat.abc.analysis._
 
-object DoWork {
+object Tool {
 
   import apparat.abc.AbcNamespaceKind._
   val proxyPackage = AbcNamespace(Package,Symbol("com.oggi.Player"))
@@ -97,9 +97,9 @@ object DoWork {
     
     // try to see if bytecode has addEventListener call operation
     ops.find {
-        case CallProperty(AbcQName('addEventListener, _), _) => true
-        case CallPropVoid(AbcQName('addEventListener, _), _) => true
-        case _ => false
+      case CallProperty(AbcQName('addEventListener, _), _) => true
+      case CallPropVoid(AbcQName('addEventListener, _), _) => true
+      case _ => false
     } .map { addEventListenerOp =>
       // if so let replace it to call a proxy instead
       val idx = ops.indexOf(addEventListenerOp)
@@ -116,13 +116,19 @@ object DoWork {
         case (chain, firstOp) if chain == null => filter { case `firstOp` => true }
         case (chain, anotherOp) => chain ~ filter { case `anotherOp` => true }
       }
-      // replace the chain with proxy call chain
-      bytecode.replace(chain) { _ =>
-        FindPropStrict(proxyClass) ::
+      val newChain = FindPropStrict(proxyClass) ::
         GetProperty(proxyClass) ::
         paramOps :::
-        CallProperty(proxyMethod, addEventListenerOp.popOperands) :: Nil
+        CallProperty(proxyMethod, addEventListenerOp.popOperands) :: 
+        (if (addEventListenerOp.opCode == Op.callpropvoid) Pop() :: Nil else Nil)
+
+      // replace the chain with proxy call chain
+      val result = bytecode.replace(chain)(_ => newChain)
+      newChain.filter(bytecode.markers.hasMarkerFor _) match {
+        case op :: rest => bytecode.markers.forwardMarker(op, newChain(0))
+        case _ =>
       }
+      result
     } .getOrElse(false)
   }
 
