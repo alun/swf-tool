@@ -6,7 +6,7 @@ import combinator._
 import BytecodeChains._
 import operations._
 import apparat.abc.analysis._
-import scala.collection.immutable.StringOps
+import java.io.FileOutputStream
 
 object SwfTool {
 
@@ -79,6 +79,16 @@ object SwfTool {
         method.dump()
       }
     }
+  }
+
+  def binary(file:String) {
+    val swf = Swf fromFile file
+    swf.tags.foldLeft(0) { (idx, tag) => tag match {
+      case tag: DefineBinaryData =>
+        new FileOutputStream("output%d.swf" format idx).write(tag.data)
+        idx + 1
+      case _ => idx
+    } }
   }
 
   def proxify(file: String) {
