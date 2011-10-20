@@ -6,6 +6,7 @@ import combinator._
 import BytecodeChains._
 import operations._
 import apparat.abc.analysis._
+import java.io.FileOutputStream
 
 object Tool {
 
@@ -25,6 +26,8 @@ object Tool {
         case Some("proxy") =>
           // we get a "proxy" instuction so lets change addEventListener calls to proxy
           proxify(file)
+        case Some("binary") =>
+          binary(file)
         case _ =>
           dump(file)
       }
@@ -44,6 +47,16 @@ object Tool {
         method.dump()
       }
     }
+  }
+
+  def binary(file:String) {
+    val swf = Swf fromFile file
+    swf.tags.foldLeft(0) { (idx, tag) => tag match {
+      case tag: DefineBinaryData =>
+        new FileOutputStream("output%d.swf" format idx).write(tag.data)
+        idx + 1
+      case _ => idx
+    } }
   }
 
   def proxify(file: String) {
