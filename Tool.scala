@@ -10,8 +10,10 @@ import apparat.abc.analysis._
 object Tool {
 
   import apparat.abc.AbcNamespaceKind._
-  val proxyPackage = AbcNamespace(Package,Symbol("com.oggi"))
-  val proxyClass = AbcQName('GoogleMapsHook, proxyPackage)
+
+  // specify which static method we can use for proxy
+  val proxyPackage = AbcNamespace(Package,Symbol(""))
+  val proxyClass = AbcQName('Hook, proxyPackage)
   val rootPackage = AbcNamespace(Package,Symbol(""))
   val proxyMethod = AbcQName('setupEventListener, rootPackage)
 
