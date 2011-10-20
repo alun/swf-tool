@@ -19,7 +19,9 @@ public class Hook {
 	 * @param dispatcher this may be not the IEventDispatcher object so has type of *
 	 */
 	public static function setupEventListener(dispatcher : *, ... params) : void {
-		trace("Hook is setting up the listener: " + params.splice(0, 0, dispatcher).join(" ~ "));
+		var traceVals : Array = params.slice();
+		traceVals.splice(0, 0, dispatcher);
+		trace("Hook is setting up the listener for: " + traceVals.join(" ~ "));
 
 		if (dispatcher is Stage) {
 			trace("dispatcher is Stage, trying to use internal stage instead...");
