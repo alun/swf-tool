@@ -5,4 +5,5 @@ h1. How to use
 # Setup APPARAT_HOME env variable to point to apparat jars dir.
 # Build the tool with ./build.sh
 # Make conversion ./run.sh path/to/swc proxy, this will modify swc in place
+
 As a result you'll get modified swc which will call a Hook.as proxy class every time when it were call addEventListener before.
