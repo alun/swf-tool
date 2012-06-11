@@ -6,8 +6,9 @@ import combinator._
 import BytecodeChains._
 import operations._
 import apparat.abc.analysis._
+import scala.collection.immutable.StringOps
 
-object Tool {
+object SwfTool {
 
   import apparat.abc.AbcNamespaceKind._
   val proxyPackage = AbcNamespace(Package,Symbol("com.oggi"))
@@ -15,18 +16,52 @@ object Tool {
   val rootPackage = AbcNamespace(Package,Symbol(""))
   val proxyMethod = AbcQName('setupEventListener, rootPackage)
 
+  class Formatter(s:String) {
+    def format(replacements:Seq[(String,Any)]):String = replacements match {
+      case h :: xs => s.replace("${" + h._1 + "}", h._2.toString()).format(xs)
+      case _ => s
+    }
+  }
+
+  def printUsage() {
+    val usage = """
+      |  Usage: ${className} file.swf {proxify, mainClass, dump}
+      |
+      |  Where:
+      |    file.swf - path to file you want work with
+      |
+      |    proxify - make an addEventListener proxied version of the swf
+      |    mainClass - print a mainclass name
+      |    dump - prints bytecode dump on the screen""" .stripMargin
+    println(new Formatter(usage).format {
+        "className" -> SwfTool.getClass.getName :: Nil
+    })
+  }
+
   def main(args: Array[String]) {
-    for {
+    (for {
       file <- args.headOption
-    } {
+    } yield {
       args.drop(1).headOption match {
-        case Some("proxy") =>
+        case Some("proxify") =>
           // we get a "proxy" instuction so lets change addEventListener calls to proxy
           proxify(file)
-        case _ =>
+        case Some("mainClass") =>
+          mainClass(file)
+        case Some("dump") =>
           dump(file)
+        case _ =>
+          printUsage
       }
+    }) match {
+      case None => printUsage
+      case _ =>
     }
+  }
+
+  def mainClass(file: String) {
+    val swf = Swf fromFile file
+    println(swf.mainClass)
   }
 
   def dump(file: String) {

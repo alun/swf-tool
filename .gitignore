@@ -4,3 +4,5 @@ RECOVER_*.fla
 test
 *.swc
 *.swf
+project/target
+target
