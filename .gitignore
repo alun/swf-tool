@@ -6,3 +6,5 @@ test
 *.swf
 project/target
 target
+.idea
+.idea_modules
