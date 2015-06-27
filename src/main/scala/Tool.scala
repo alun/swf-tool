@@ -147,7 +147,7 @@ object SwfTool {
       case CallProperty(AbcQName('addEventListener, _), _) => true
       case CallPropVoid(AbcQName('addEventListener, _), _) => true
       case _ => false
-    } .map { addEventListenerOp =>
+    } .exists { addEventListenerOp =>
       // if so let replace it to call a proxy instead
       val idx = ops.indexOf(addEventListenerOp)
       val (beforeOps, _) = ops.splitAt(idx)
@@ -176,7 +176,7 @@ object SwfTool {
         case _ =>
       }
       result
-    } .getOrElse(false)
+    }
   }
 
 }

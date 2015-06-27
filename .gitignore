@@ -2,8 +2,6 @@ bin/*.class
 *.swp
 RECOVER_*.fla
 test
-*.swc
-*.swf
 project/target
 target
 .idea
