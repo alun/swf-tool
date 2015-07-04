@@ -146,7 +146,7 @@ object SwfTool {
     }
 
     val container = TagContainer fromFile file
-    val violations = container.tags.collect(findSoundMixerUsage).reduceLeft(_ ++ _)
+    val violations = container.tags.collect(findSoundMixerUsage).reduceLeftOption(_ ++ _).getOrElse(Nil)
 
     if (!violations.isEmpty) {
       println("Global SoundMixer access detected!")
