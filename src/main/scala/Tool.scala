@@ -163,41 +163,58 @@ object SwfTool {
     }
   }
 
+  def firstMixerResetIn(ops:List[AbstractOp]): List[AbstractOp] = {
+    val soundMixerUsageStart = ops.dropWhile {
+      case
+        FindPropStrict(AbcQName('SoundMixer, AbcNamespace(AbcNamespaceKind.Package, Symbol("flash.media")))) |
+        GetLex(AbcQName('SoundMixer, AbcNamespace(AbcNamespaceKind.Package, Symbol("flash.media")))) =>
+        false
+      case _ => true
+    }
+
+    def streamIt[T, B](coll: List[T], v: B)(f: (T, B) => B): Stream[(T, B)] =
+      coll match {
+        case e :: _ =>
+          val nv = f(e, v)
+          (e, nv) #:: streamIt(coll.tail, nv)(f)
+        case _ => Stream.empty
+      }
+
+    val opsWithStackSizes = streamIt(soundMixerUsageStart, 0) {
+      case (op, stackSize) =>
+        stackSize + op.pushOperands - op.popOperands
+    }
+
+    val soundMixerOps = {
+      val (ops, nextOps) = opsWithStackSizes.span(_._2 != 0)
+      ops #::: nextOps.take(1)
+    }.map(_._1)
+
+    val soundMixerTouched = soundMixerOps.exists {
+      case SetProperty(AbcQName('soundTransform, AbcNamespace(AbcNamespaceKind.Package, Symbol("")))) => true
+      case _ => false
+    }
+
+    if (soundMixerTouched) {
+      soundMixerOps.toList 
+    } else {
+      val restOps = soundMixerUsageStart.drop(soundMixerOps.size)
+      if (restOps.nonEmpty) {
+        firstMixerResetIn(restOps)
+      }
+      else {
+        Nil
+      }
+    }
+  }
+
   def findGlobalMixerReset(method:AbcMethod):List[AbstractOp] = {
     val result = for {
       body <- method.body
       bytecode <- body.bytecode
       ops = bytecode.ops
     } yield {
-      val soundMixerUsageStart = ops.dropWhile {
-        case FindPropStrict(AbcQName('SoundMixer, AbcNamespace(AbcNamespaceKind.Package, Symbol("flash.media")))) => false
-        case _ => true
-      }
-
-      def streamIt[T, B](coll: List[T], v: B)(f: (T, B) => B): Stream[(T, B)] =
-        coll match {
-          case e :: _ =>
-            val nv = f(e, v)
-            (e, nv) #:: streamIt(coll.tail, nv)(f)
-          case _ => Stream.empty
-        }
-
-      val opsWithStackSizes = streamIt(soundMixerUsageStart, 0) {
-        case (op, stackSize) =>
-          stackSize + op.pushOperands - op.popOperands
-      }
-
-      val soundMixerOps = {
-        val (ops, nextOps) = opsWithStackSizes.span(_._2 != 0)
-        ops #::: nextOps.take(1)
-      }.map(_._1)
-
-      val soundMixerTouched = soundMixerOps.exists {
-        case SetProperty(AbcQName('soundTransform, AbcNamespace(AbcNamespaceKind.Package, Symbol("")))) => true
-        case _ => false
-      }
-
-      if (soundMixerTouched) soundMixerOps.toList else Nil
+      firstMixerResetIn(ops)
     }
     result.getOrElse(Nil)
   }
