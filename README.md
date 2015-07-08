@@ -23,7 +23,8 @@ sbt 'run VPAIDSoundTest.swf soundCheck' # detects if SWF has access to SoundMixe
 sbt assembly
 ```
 
-JAR file will be produced after that which could be run as:
+This command procues a JAR file which includes all necessary libraries to run it on JVM with no
+scala or other dependencies. The result file could be run as:
 
 ```
 java -jar target/scala-2.8.1/as3-proxy-assembly-0.1-SNAPSHOT.jar VPAIDSoundTest.swf soundCheck
